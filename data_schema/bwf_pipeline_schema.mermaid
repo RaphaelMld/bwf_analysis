@@ -1,0 +1,86 @@
+erDiagram
+  tournaments {
+    serial id PK
+    int bwf_id
+    uuid bwf_code
+    varchar name
+    varchar category
+    int category_id
+    date start_date
+    date end_date
+    varchar location
+    varchar country
+    int prize_money
+    timestamp created_at
+  }
+  players {
+    serial id PK
+    varchar bwf_id
+    varchar first_name
+    varchar last_name
+    varchar display_name
+    char country_code
+    timestamp created_at
+    timestamp updated_at
+  }
+  matches {
+    serial id PK
+    int bwf_match_id
+    int tournament_id FK
+    varchar discipline
+    varchar round_name
+    timestamp match_time_utc
+    int player1_id FK
+    int player2_id FK
+    int player1_seed
+    int player2_seed
+    int winner
+    int score_status
+    int duration_minutes
+    timestamp created_at
+  }
+  set_scores {
+    serial id PK
+    int match_id FK
+    int set_number
+    int score_player1
+    int score_player2
+  }
+  ratings_history {
+    serial id PK
+    int player_id FK
+    varchar discipline
+    varchar rating_type
+    float rating_value
+    int matches_played
+    int after_match_id FK
+    timestamp computed_at
+  }
+  bwf_rankings {
+    serial id PK
+    int player_id FK
+    varchar discipline
+    int rank
+    float points
+    date week_date
+    timestamp created_at
+  }
+  scraping_jobs {
+    serial id PK
+    int tournament_id FK
+    varchar status
+    int retry_count
+    text error_message
+    timestamp started_at
+    timestamp completed_at
+    timestamp created_at
+  }
+
+  tournaments ||--o{ matches : "contains"
+  tournaments ||--o{ scraping_jobs : "tracked by"
+  players ||--o{ matches : "player1"
+  players ||--o{ matches : "player2"
+  matches ||--o{ set_scores : "has"
+  matches ||--o{ ratings_history : "triggers"
+  players ||--o{ ratings_history : "belongs to"
+  players ||--o{ bwf_rankings : "ranked in"
