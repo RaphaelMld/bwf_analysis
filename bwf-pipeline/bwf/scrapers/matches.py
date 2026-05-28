@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from bwf.config import settings
+from bwf.scrapers.http import BWF_HEADERS
 from bwf.database import get_session
 from bwf.models import Match, Player, ScrapingJob, SetScore, Tournament
 
@@ -247,7 +248,7 @@ def run_pending_jobs() -> None:
     logger.info(f"{len(pending)} jobs en attente")
 
     with httpx.Client(
-        headers={"User-Agent": "Mozilla/5.0 (research project)"},
+        headers=BWF_HEADERS,
         follow_redirects=True,
     ) as client:
         for job in pending:

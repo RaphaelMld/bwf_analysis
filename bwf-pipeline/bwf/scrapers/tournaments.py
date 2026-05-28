@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from bwf.config import settings
+from bwf.scrapers.http import BWF_HEADERS
 from bwf.database import get_session
 from bwf.models import ScrapingJob, Tournament
 
@@ -117,7 +118,7 @@ def discover_tournaments(from_year: int | None = None) -> None:
     logger.info(f"Découverte des tournois {start_year} → {current_year}")
 
     with httpx.Client(
-        headers={"User-Agent": "Mozilla/5.0 (research project)"},
+        headers=BWF_HEADERS,
         follow_redirects=True,
     ) as client:
         with get_session() as session:
