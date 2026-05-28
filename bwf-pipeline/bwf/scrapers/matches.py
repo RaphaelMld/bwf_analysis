@@ -13,7 +13,9 @@ from bwf.models import Match, Player, ScrapingJob, SetScore, Tournament
 logger = logging.getLogger(__name__)
 
 
+# ---------------------------------------------------------------------------
 # Joueurs
+# ---------------------------------------------------------------------------
 
 def upsert_player(session: Session, player_data: dict) -> int:
     """Insère ou met à jour un joueur. Retourne l'id interne (PK)."""
@@ -40,7 +42,9 @@ def upsert_player(session: Session, player_data: dict) -> int:
     return result.scalar_one()
 
 
+# ---------------------------------------------------------------------------
 # Fetch API
+# ---------------------------------------------------------------------------
 
 def fetch_day_matches(
     tournament_code: str,
@@ -62,7 +66,9 @@ def fetch_day_matches(
     return response.json()
 
 
+# ---------------------------------------------------------------------------
 # Parsing
+# ---------------------------------------------------------------------------
 
 def parse_seed(raw: str | None) -> int | None:
     """Convertit '1' ou None en int."""
@@ -93,7 +99,9 @@ def parse_match_time(raw: str | None) -> datetime | None:
         return None
 
 
+# ---------------------------------------------------------------------------
 # Upsert match + set scores
+# ---------------------------------------------------------------------------
 
 def upsert_match(
     session: Session,
@@ -145,7 +153,9 @@ def insert_set_scores(session: Session, match_id: int, scores: list[dict]) -> No
     session.flush()
 
 
+# ---------------------------------------------------------------------------
 # Scraping d'un tournoi
+# ---------------------------------------------------------------------------
 
 def scrape_tournament(tournament: Tournament, client: httpx.Client) -> tuple[int, int]:
     """
@@ -189,7 +199,7 @@ def scrape_tournament(tournament: Tournament, client: httpx.Client) -> tuple[int
 
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 404:
-                # Pas de matchs ce jour-là, normal
+                # Pas de matchs ce jour-là — normal
                 logger.debug(f"{current_day} : pas de matchs (404)")
             else:
                 logger.error(f"HTTP {e.response.status_code} pour {current_day}")
@@ -201,7 +211,9 @@ def scrape_tournament(tournament: Tournament, client: httpx.Client) -> tuple[int
     return inserted, skipped
 
 
+# ---------------------------------------------------------------------------
 # Gestion des jobs
+# ---------------------------------------------------------------------------
 
 def mark_job(session: Session, job: ScrapingJob, status: str, error: str | None = None) -> None:
     job.status = status
@@ -224,7 +236,7 @@ def run_pending_jobs() -> None:
             .filter_by(status="pending")
             .join(Tournament)
             .filter(Tournament.end_date <= date.today())  # tournoi terminé uniquement
-            .order_by(Tournament.end_date.asc())  # du plus ancien au plus récent
+            .order_by(Tournament.end_date.asc())           # du plus ancien au plus récent
             .all()
         )
 
@@ -235,7 +247,7 @@ def run_pending_jobs() -> None:
     logger.info(f"{len(pending)} jobs en attente")
 
     with httpx.Client(
-        headers={"User-Agent": "Mozilla/5.0 (research project — contact: ton@email.com)"},
+        headers={"User-Agent": "Mozilla/5.0 (research project)"},
         follow_redirects=True,
     ) as client:
         for job in pending:

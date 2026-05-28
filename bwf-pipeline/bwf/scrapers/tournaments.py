@@ -117,7 +117,7 @@ def discover_tournaments(from_year: int | None = None) -> None:
     logger.info(f"Découverte des tournois {start_year} → {current_year}")
 
     with httpx.Client(
-        headers={"User-Agent": "Mozilla/5.0 (research project — contact: ton@email.com)"},
+        headers={"User-Agent": "Mozilla/5.0 (research project)"},
         follow_redirects=True,
     ) as client:
         with get_session() as session:
